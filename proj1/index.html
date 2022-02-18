@@ -1,7 +1,150 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 1 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184 Rasterizer</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+<h1 align="middle">Project 1: Rasterizer</h1>
+<h2 align="middle">Hans Zhang, Bilal Syed, CS184-Spring 2022</h2>
+
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview</h2>
+<p>In this project we implemented a rasterizer for images that supports various sampling methods such as pixel sampling, level sampling, and super sampling. We compared different sampling approaches in terms of efficiency, memory usage, and accuracy such as nearest sampling or bilinear sampling methods. What was interesting was seeing how the different sampling methods interpreted the rasterization of images such as how bilinear sampling produces more blurry contours at edges. I learned that different rasterization methods are applicable for different use cases; such as how pixel sampling excels in processing speed while level sampling exceeds in accuracy and has a larger range of textures that can be applied.
+</p>
+
+<h2 align="middle">Section I: Rasterization</h2>
+
+<h3 align="middle">Part 1: Rasterizing single-color triangles</h3>
+
+<p>The code that I have for rasterizing triangles checks each pixel on the drawing and checks if it’s in the triangle. I then used the point-in-triangle test to see if each point is within the planes of the three vertices. For each point, I added 0.5 to the x and y coordinates because we are checking to see if the center of the pixel is within the triangle. Next, I calculated L0, the line for x1 to x0, L1, the line from x2 to x1, and L2, the line from x0 to x2. I checked to see if the point is within these three lines by checking if L0, L1, and L2 are greater than or equal to 0. I also had the case where I checked if L0, L1, and L2 were all less than or equal to 0 to account for the winding order of the vertices.</p>
+<p>In my code, I wasn’t able to code the algorithm that doesn’t check each sample in the frame buffer without breaking the code. However, the way I would’ve done it was instead of starting at the (0,0) x,y coordinates, I would’ve started at the lowest x value which would be minimum(x0, x1, x2). Next, I would’ve done the same to find the lowest y value to start at. Finally, I would call max(x0, x1, x2) and max(y0, y1, y2) to find where we stop sampling.</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/screenshot_2-16_20-18-40.png" align="middle" width="400px"/>
+        <figcaption align="middle">Default viewing basic/test4/svg</figcaption>
+      </td>
+      <td>
+        <img src="images/screenshot_2-17_13-16-39.png" align="middle" width="400px"/>
+        <figcaption align="middle">Pixel Inspector</figcaption>
+      </td>
+    </tr>
+    <br>
+
+  </table>
+</div>
+
+
+<h3 align="middle">Part 2: Antialiasing triangles</h3>
+<p>For supersampling, I added another double for loop within the previous loop in rasterize_triangle. This new loop helps check the inner supersampled pixels within each pixel to see if it’s within the triangle. Supersampling is useful because it makes certain pixels lighter so the overall image is more accurate. I also changed resolve_to_framebuffer to average out the samples within each pixel. I used supersampling to average out samples in a pixel to antialias the triangles.</p>
+<p>We can see that as the sample rate increases, more of the pixels are blurred out. This is due to the fact that less supersampled pixels are inside of the triangle boundaries so each pixel is blurred out more. </p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/screenshot_2-17_16-10-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">Sample rate 1</figcaption>
+      </td>
+      <td>
+        <img src="images/screenshot_2-17_16-10-10.png" align="middle" width="400px"/>
+        <figcaption align="middle">Sample rate 4</figcaption>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <img src="images/screenshot_2-17_16-10-23.png" align="middle" width="400px"/>
+        <figcaption align="middle">Sample rate 16</figcaption>
+      </td>
+
+    </tr>
+    <br>
+
+  </table>
+</div>
+<h3 align="middle">Part 3: Transforms</h3>
+<p>In my updated drawing, I tried to make the robot look like he was jumping up in the air. I did this by moving his legs and arms by 45 and 135 degrees.</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/screenshot_2-16_21-7-23.png" align="middle" width="400px"/>
+        <figcaption align="middle">my_robot.svg</figcaption>
+      </td>
+    </tr>
+    <br>
+  </table>
+</div>
+
+<h2 align="middle">Section II: Sampling</h2>
+
+<h3 align="middle">Part 4: Barycentric coordinates</h3>
+<p>Barycentric coordinates are used to get the weighted sum of the vertices. For example in the picture, we see that the vertex colors are red, blue, and light blue. We can see that the points in the triangle that are closer to red are mainly red and that points right in the middle of red and blue are a mix of those two vertices. We get alpha, beta, and gamma values that are placed in front of the vertex values and are summed to get the value of the point.</p>
+<div align="middle">
+  <table style="width=100%">
+    <tr>
+      <td>
+        <img src="images/screenshot_2-16_21-46-16.png" align="middle" width="400px"/>
+        <figcaption align="middle">Example</figcaption>
+      </td>
+      <td>
+        <img src="images/screenshot_2-16_20-51-2.png" align="middle" width="400px"/>
+        <figcaption align="middle">svg/basic/test7.svg</figcaption>
+      </td>
+    </tr>
+
+    <br>
+
+  </table>
+</div>
+<h3 align="middle">Part 5: "Pixel sampling" for texture mapping</h3>
+<p>Pixel sampling is the method of filling in a pixel’s color based on the colors of pixels nearby it. Based on the color on the texture map of colors nearby a point, we determine an estimate of the pixel in question’s color. The two pixel sampling methods we used were nearest and bilinear; we used these in our rasterize_triangle function in order to denote colors of our image from texture maps. Nearest neighbor sampling essentially colors a point to that of the nearest coordinate color on the texture map. We do this by rounding the approximate location on the texture map of the triangle itself (to whole number or integer coordinates), which we then use to determine the nearest texture map point or color. This process is fast but it trades off accuracy since a lot of jagged edges may arise from simply mapping a point’s color to that of the nearest whole coordinate. In contrast, bilinear sampling is slower but generally more accurate. In short, bilinear sampling takes a weighted sum of the colors of four boundary points on the texture map surrounding the desired point itself, and then returns this weighted sum as the color of the point in question. The weights in this equation are proportional to the distance from the actual point to the boundary point in the texture map that is being weighed. This method is more elegant as it leads to more natural or continuous blurred contours for the colors of points, but it is slower than the nearest method. And so, the use case of either method over another is context dependent.
+</p>
+<table style="width=100%">
+  <tr>
+    <td>
+      <img src="images/screenshot_2-17_16-27-1.png" align="middle" width="400px"/>
+      <figcaption align="middle">Nearest Sampling</figcaption>
+    </td>
+    <td>
+      <img src="images/screenshot_2-17_16-27-4.png" align="middle" width="400px"/>
+      <figcaption align="middle">Bilinear</figcaption>
+    </td>
+  </tr>
+
+  <br>
+
+</table>
+<h3 align="middle">Part 6: "Level sampling" with mipmaps for texture mapping</h3>
+<p>Levels essentially refers to the amount of blur we want to invoke for the underlying texture map that we use when determining appropriate color assignment. A higher level implies a more blurry texture map; specifically, this means that we sample the nearest or, in the case of bilinear sampling, the nearest 4 points from a texture map with less texels per pixel. The opposite is true for lower levels, with low levels implying higher specificity or more texels per pixel; and so a very low level is closer to the true texture and color scheme of the image. First, we calculated the barycentric coordinates of point (x, y), the same point plus one in the x direction, and the same point plus one in the y direction in our rasterizer_textured_triangle and stored these in the parameter struct in order to properly invoke the sample methods. These sample methods would then act accordingly based on the lsm/psm values passed in (bilinear or nearest).
+</p>
+<p>If speed of processing is more important than accuracy for the given use case, then pixel sampling is generally your best bet compared to level and super-sampling methods. Given the variation of textures level sampling operates on, there is a larger range of outputs level sampling can produce which may be better than normal sampling results. Intuitively, the higher number of samples per pixel you desire the slower your process gets at a rate proportional to the higher number of samples per pixel. Pixel sampling is the fastest, and does not use much memory compared to the other two methods, but has the highest alias rate (jaggies) compared to the other methods due to the lack of texture variance operated on. Level sampling is great at anti-aliasing compared to the other two methods due to the amount of texture variance in terms of blur or specificity it provides for sampling methods. It takes up more memory and is slower than pixel sampling however. Increasing the number of samples per pixel is a dimension which leads to a proportional constant decrease in speed, proportional constant increase in memory usage, but a proportional increase in antialiasing since we have more samples to extract information from.
+</p>
+
+
+
+</body>
 </html>
