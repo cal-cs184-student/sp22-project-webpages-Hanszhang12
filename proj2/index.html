@@ -1,7 +1,170 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+<head>
+  <style>
+    body {
+      padding: 100px;
+      width: 1000px;
+      margin: auto;
+      text-align: left;
+      font-weight: 300;
+      font-family: 'Open Sans', sans-serif;
+      color: #121212;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      font-family: 'Source Sans Pro', sans-serif;
+    }
+  </style>
+  <title>CS 184 Mesh Editor</title>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+  <link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+  <h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+  <h1 align="middle">Project 2: Mesh Editor</h1>
+  <h2 align="middle">Hans Zhang, CS184-hz</h2>
+  <h3>Link: </h3>
+  <br><br>
+
+  <div>
+
+    <h2 align="middle">Overview</h2>
+    <p>Give a high-level overview of what you implemented in this project. Think about what you've built as a whole.
+      Share your thoughts on what interesting things you've learned from completing the project.</p>
+    <p>In this project, it was interesting how 3d models were made up of Bezier Curves, Bezier Surfaces, edges, vertices, half edges, and triangle faces. It’s cool to see how algorithms such as de Casteljau’s algorithm play a big part in the creation of these meshes. It was also cool to see how vertex normals are used for Phong shading. I was already impressed with how I was able to make a teapot using the Bezier Surfaces but seeing it go from a flat to smooth surface was very cool. I also learned that edge flipping and edge flipping play a huge part in mesh upsampling to make it more smooth.
+    </p>
+    <h2 align="middle">Section I: Bezier Curves and Surfaces</h2>
+
+    <h3 align="middle">Part 1: Bezier curves with 1D de Casteljau subdivision</h3>
+
+    <p>De Casteljau’s algorithm is used to find the intermediate points in order to get the Bezier Curve. If we consider two points, A and B, this algorithm multiplies the coordinates of A by 1 - t (t being a parameter) and multiplies the coordinates of B by t. This algorithm is performed recursively to get the final interpolated vector. The implementation that I did only required one step of the algorithm. I implemented it by having a for loop that runs n - 1 times with n being the number of points. Inside of the for loop, I would add the result of the algorithm (1-t)points[i] + (t)points[i+1] to the output vector and return it at the end.
+    </p>
+
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="step1.png" align="middle" width="400px" />
+          </td>
+          <td>
+            <img src="step2.png" align="middle" width="400px" />
+          </td>
+        </tr>
+        <br>
+        <tr>
+          <td>
+            <img src="step3.png" align="middle" width="400px" />
+          </td>
+          <td>
+            <img src="step4.png" align="middle" width="400px" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <img src="step5.png" align="middle" width="400px" />
+          </td>
+          <td>
+            <img src="step6.png" align="middle" width="400px" />
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <img src="newcurve.png" align="middle" width="400px" />
+          </td>
+
+        </tr>
+      </table>
+    </div>
+
+
+    <h3 align="middle">Part 2: Bezier surfaces with separable 1D de Casteljau subdivision</h3>
+    <p>Bezier surfaces use the Casteljau algorithm first to give four control points on a single Bezier curve and then use the algorithm again to evaluate a point on the “moving” curve of the four control points. My first step in implementing Bezier surfaces was to evaluate a single step of the de Casteljau algorithm for 3d points. Next, I implemented the function that recursively called the first function to get the control point. Lastly, I implemented the function that first performs de Casteljau using the parameter u to get the control points. I then called the first function on these control points using the parameter v.
+    </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="task2_teapot.png" align="middle" width="400px" />
+          </td>
+
+        </tr>
+      </table>
+    </div>
+
+    <h2 align="middle">Section II: Sampling</h2>
+
+    <h3 align="middle">Part 3: Average normals for half-edge meshes</h3>
+    <p>I was able to implement area-weighted vertex normals by having a while loop that iterates through neighboring faces. I started with a vector consisting of 0’s. For each iteration, I would add the normal of the current triangle. The while loop would keep running until it returned to the original edge. At the end, I called unit() on the vector with the sum of the normals to get the output.
+    </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="task3_before.png" align="middle" width="400px" />
+          </td>
+          <td>
+            <img src="task3_after.png" align="middle" width="400px" />
+          </td>
+        </tr>
+        <br>
+      </table>
+    </div>
+
+    <h3 align="middle">Part 4: Half-edge flip</h3>
+    <p>For this implementation, I had a lot of trouble at first because I had difficulty visualizing the flip. As a result, I was stuck with a lot of pointers that weren’t accounted for. I used a helpful diagram that had the before and after of the flip with all the half edges, vertexes, and edges labeled to aid me in this. Afterwards, the implementation was pretty easy. It was just a matter of setting the half edges for the vertices, edges, and faces and then setting the neighbors for each of the inner half edges.
+
+    </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="task4_before.png" align="middle" width="400px" />
+          </td>
+          <td>
+            <img src="task4_after.png" align="middle" width="400px" />
+          </td>
+        </tr>
+        <br>
+      </table>
+    </div>
+    <h3 align="middle">Part 5: Half-edge split</h3>
+    <p>Edge splitting was a lot more difficult in comparison to edge flipping because there were new edges, half edges, faces, and vertices that needed to be created. I used newVertex, newEdge, newFace, and newHalfedge to create the new elements. After that, I set the neighbors for the half edges and the half edges for all the elements. I calculated the middle vertex by adding up the positions of the vertices on the edges and then dividing by 2.
+
+    </p>
+    <div align="middle">
+      <table style="width=100%">
+        <tr>
+          <td>
+            <img src="task5_before.png" align="middle" width="400px" />
+          </td>
+          <td>
+            <img src="task5_splits.png" align="middle" width="400px" />
+          </td>
+          <td>
+            <img src="task5_split_flip.png" align="middle" width="400px" />
+          </td>
+        </tr>
+        <br>
+      </table>
+    </div>
+    <h3 align="middle">Part 6: Loop subdivision for mesh upsampling</h3>
+    <p>
+    </p>
+
+
+    <h2 align="middle">Section III: Optional Extra Credit</h2>
+    <p>If you are not participating in the optional mesh competition, don't worry about this section!</p>
+
+    <h3 align="middle">Part 7: Design your own mesh!</h3>
+
+</body>
+
 </html>
