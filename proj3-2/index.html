@@ -1,7 +1,122 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 3-2 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+    div.padded {
+      padding-top: 0px;
+      padding-right: 100px;
+      padding-bottom: 0.25in;
+      padding-left: 100px;
+    }
+  </style>
+<title>Your Name  |  CS 184</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link rel="stylesheet" type="text/css" href="style.css" media="screen" />
+</head>
+<body>
+<br />
+<h1 align="middle">Assignment 3-2: PathTracer 2</h1>
+    <h2 align="middle">Hans Zhang, Bilal Syed</h2>
+    <h2 align="middle">Link: https://cal-cs184-student.github.io/sp22-project-webpages-Hanszhang12/proj3-2/index.html</h2>
+
+    <h3 align="middle">Overview</h3>
+
+    <div class="padded">
+        <p>In this project, we implemented Part 1: Mirror and Glass Materials and Part 2: Microfacet Material. For part 1, I was able to implement mirror materials by using reflections and glass materials by using refraction. For part 2, we were able to implement microfacet materials that allowed us to render different types of metal materials.</p>
+        <p>It was interesting to see how different factors such as the index of refraction and Schlick’s approximation play a big part in implementing refraction. My favorite part of the project was getting CBlucy.png to render correctly. Next time I play a video game, I’ll appreciate the detail that goes into making all of the different types of materials. I also learned that implementing different algorithms is pretty straightforward but it’s super important to double check everything thoroughly afterwards. I was stuck on the spheres not rendering for a while due to a small error in one of my algorithms.
+</p>
+    <h2 align="middle">Part 1: Mirror and Glass Materials</h2>
+        <p>For the image corresponding to m = 0, we just see the light at the top. This is due to the fact that since there’s no bounce, nothing in the image is illuminated. For m = 1, we can make out the spheres but they remain black because the max ray depth is only one. This means that the limited max ray depth prevents the light from bouncing off objects. For m = 2, we can see the mirror sphere but the glass sphere still remains unclear because the bounce number is still too low to pass through the glass sphere. For m = 3, we can now see the glass sphere clearly. However, the reflection of the glass sphere in the mirror sphere is still a bit unclear. We can also see the light passing through the glass sphere. For m = 4, we can see the glass sphere clearly in the mirror sphere. We can also see some of the light refract on the right wall. Max ray depth 5 and 100 are pretty similar but a bit brighter than the previous images.  </p>
+        <div align="center">
+            <table style="width=100%">
+                <tr>
+                    <td>
+                    <img src="images/CBSpheres_max_depth_0.png" width="480px" />
+                    <figcaption align="middle">max depth = 0</figcaption>
+                    <td>
+                      <td>
+                      <img src="images/CBSpheres_max_depth_1.png" width="480px" />
+                      <figcaption align="middle">max depth = 1</figcaption>
+                      <td>
+                </tr>
+                <tr>
+                    <td>
+                    <img src="images/CBSpheres_max_depth_2.png" width="480px" />
+                    <figcaption align="middle">max depth = 2</figcaption>
+                    <td>
+                      <td>
+                      <img src="images/CBSpheres_max_depth_3.png" width="480px" />
+                      <figcaption align="middle">max depth = 3</figcaption>
+                      <td>
+                </tr>
+                <tr>
+                    <td>
+                    <img src="images/CBSpheres_max_depth_4.png" width="480px" />
+                    <figcaption align="middle">max depth = 4</figcaption>
+                    <td>
+                      <td>
+                      <img src="images/CBSpheres_max_depth_5.png" width="480px" />
+                      <figcaption align="middle">max depth = 5</figcaption>
+                      <td>
+                </tr>
+                <tr>
+                    <td>
+                    <img src="images/CBSpheres_max_depth_100.png" width="480px" />
+                    <figcaption align="middle">max depth = 100</figcaption>
+                    <td>
+                      <td>
+                      <img src="images/CBlucy.png" width="480px" />
+                      <figcaption align="middle">CBlucy.png</figcaption>
+                      <td>
+                </tr>
+            </table>
+        </div>
+        <h2 align="middle">Part 2: Microfacet Material</h2>
+            <p>A decreased alpha value pertains to a more mirror-like and smooth appearance, while larger alpha values correspond to a brighter yet less mirror-like and more opaque image. </p>
+            <p>The bunny rendered with importance sampling clearly has smoother edges and contours that provide the bunny with a more realistic 3D shape and color. Furthermore, the lighting of the importance-sampling bunny is more realistic given the scene at hand and the light above the bunny. The cosine sampling bunny has a strange dark aura surrounding it and has a less smooth surface in contrast to the former. </p>
+            <p>In order to render a silver bunny, I used the eta parameters: (0.0592, 0.0599, 0.0474) and the k parameters: (4.1283, 3.5892, 2.8132) which I figured out by googling how to represent silver surfaces. As shown in the image, the bunny appears less mirror-like and has a more silvery sheen to it. </p>
+            <div align="center">
+                <table style="width=100%">
+                    <tr>
+                        <td>
+                        <img src="images/CBdragon_microfacet_au_a005.png" width="480px" />
+                        <figcaption align="middle">alpha = .005</figcaption>
+                        <td>
+                          <td>
+                          <img src="images/CBdragon_microfacet_au_a05.png" width="480px" />
+                          <figcaption align="middle">alpha = .05</figcaption>
+                          <td>
+                    </tr>
+                    <tr>
+                        <td>
+                        <img src="images/CBdragon_microfacet_au_a25.png" width="480px" />
+                        <figcaption align="middle">alpha = .25</figcaption>
+                        <td>
+                          <td>
+                          <img src="images/CBdragon_microfacet_au_a5.png" width="480px" />
+                          <figcaption align="middle">alpha = .5</figcaption>
+                          <td>
+                    </tr>
+                    <tr>
+                        <td>
+                        <img src="images/CBbunny_microfacet_cu_importance.png" width="480px" />
+                        <figcaption align="middle">importance sampling</figcaption>
+                        <td>
+                          <td>
+                          <img src="images/CBbunny_microfacet_cu_cosine.png" width="480px" />
+                          <figcaption align="middle">cosine sampling</figcaption>
+                          <td>
+                    </tr>
+                    <tr>
+                        <td>
+                        <img src="images/CBbunny_microfacet_cu_silver.png" width="480px" />
+                        <figcaption align="middle">Silver Bunny</figcaption>
+                    </tr>
+
+
+
+                </table>
+            </div>
+</div>
+</body>
 </html>
