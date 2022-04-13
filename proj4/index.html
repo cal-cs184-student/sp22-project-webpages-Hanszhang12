@@ -1,7 +1,236 @@
-<html>
-	<head>
-	</head>
-	<body>
-		Project 4 here
-	</body>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<style>
+  body {
+    padding: 100px;
+    width: 1000px;
+    margin: auto;
+    text-align: left;
+    font-weight: 300;
+    font-family: 'Open Sans', sans-serif;
+    color: #121212;
+  }
+  h1, h2, h3, h4 {
+    font-family: 'Source Sans Pro', sans-serif;
+  }
+</style>
+<title>CS 184 Mesh Editor</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<link href="https://fonts.googleapis.com/css?family=Open+Sans|Source+Sans+Pro" rel="stylesheet">
+</head>
+
+
+<body>
+
+<h1 align="middle">CS 184: Computer Graphics and Imaging, Spring 2022</h1>
+<h1 align="middle">Project 4: Cloth Simulator</h1>
+<h2 align="middle">Hans Zhang & Bilal Syed, CS184-SP22</h2>
+<h2 align="middle">Link: </h2>
+
+<br><br>
+
+<div>
+
+<h2 align="middle">Overview</h2>
+<p>In this assignment, we are focused on running physical simulations. First we built out the data structures to support our simulations, and then focused on making movement possible. Rather than using numerical integration, we performed approximation in order to make our method more efficient. We handled collisions between objects appropriately by applying a correction vertex to a vector if its distance from an object is too short (below a specified threshold distance). We only moved certain loose vertices through this approach, and then finalized our assignment by implementing shader functions that use OpenGL in order to process vertex positions and color. </p>
+
+<h2 align="middle">Part I: Masses and springs</h2>
+<div align="center">
+    <table style="width=100%">
+        <tr>
+          <td>
+          <img src="part1_wireframe.png" width="480px" />
+          <figcaption align="middle">Cloth Wireframe</figcaption>
+          <td>
+
+              <td>
+              <img src="part1_shearing.png" width="480px" />
+              <figcaption align="middle">Shearing only</figcaption>
+              <td>
+        </tr>
+        <tr>
+            <td>
+            <img src="part1_no_shearing.png" width="480px" />
+            <figcaption align="middle">No shearing</figcaption>
+            <td>
+              <td>
+              <img src="part1_all_constraints.png" width="480px" />
+              <figcaption align="middle">All constraints</figcaption>
+              <td>
+        </tr>
+    </table>
+</div>
+<h2 align="middle">Part II: Simulation via numerical integration</h2>
+<p>With a low ks, the cloth falls lower than it would in comparison to a cloth with a high ks. I first set ks to 10 N/M and then to 1000 N/M. There was a very noticeable difference in the two. There’s also less of a bounce as ks increases.</p>
+<p>For higher densities, I noticed that the cloth sags a little more and falls lower than it would in comparison to a cloth with low density.</p>
+<p>When I set damping to a low value, I noticed that the cloth continued to ripple for a long time even after falling. At a high damping value, the cloth falls very slowly and it doesn’t continue to move even after falling. If you look in the picture, you can see the ripples right after the cloth falls. </p>
+<table style="width=100%">
+    <tr>
+      <td>
+      <img src="Default Shaded.png" width="480px" />
+      <figcaption align="middle">Default Shading</figcaption>
+      <td>
+
+          <td>
+          <img src="Default Wireframe.png" width="480px" />
+          <figcaption align="middle">Default Wireframe</figcaption>
+          <td>
+    </tr>
+    <tr>
+        <td>
+        <img src="part2_low_density.png" width="480px" />
+        <figcaption align="middle">Low Density</figcaption>
+        <td>
+          <td>
+          <img src="part2_high_density.png" width="480px" />
+          <figcaption align="middle">High Density</figcaption>
+          <td>
+    </tr>
+    <tr>
+        <td>
+        <img src="part2_low_spring.png" width="480px" />
+        <figcaption align="middle">Low KS</figcaption>
+        <td>
+          <td>
+          <img src="part2_high_spring.png" width="480px" />
+          <figcaption align="middle">High KS</figcaption>
+          <td>
+    </tr>
+    <tr>
+        <td>
+        <img src="part2_low_damping.png" width="480px" />
+        <figcaption align="middle">Low Damping</figcaption>
+        <td>
+
+    </tr>
+</table>
+
+<h2 align="middle">Part III: Handling collisions with other objects</h2>
+<p>We can see that for ks = 500, the cloth falls lower in comparison to ks = 5000 and ks = 50000. When ks = 50000, we can see that the sides of the cloth are floating slightly as opposed to falling down.</p>
+<table style="width=100%">
+    <tr>
+      <td>
+      <img src="part3_500.png" width="480px" />
+      <figcaption align="middle">ks = 500</figcaption>
+      <td>
+
+          <td>
+          <img src="part3_5000.png" width="480px" />
+          <figcaption align="middle">ks = 5000</figcaption>
+          <td>
+    </tr>
+    <tr>
+      <td>
+      <img src="part3_50000.png" width="480px" />
+      <figcaption align="middle">ks = 50000</figcaption>
+      <td>
+          <td>
+          <img src="part3_defaultplane.png" width="480px" />
+          <figcaption align="middle">Default Plane</figcaption>
+          <td>
+    </tr>
+    <tr>
+
+          <td>
+          <img src="part3_textureplane.png" width="480px" />
+          <figcaption align="middle">Texture Plane</figcaption>
+          <td>
+    </tr>
+</table>
+<h2 align="middle">Part IV: Handling self-collisions</h2>
+<p>For lower densities, we can see that the cloth lies relatively flat after it falls onto the plane. For higher densities, the cloth has more ripples within itself after falling on the plane. </p>
+<p>For lower ks values, we see that the cloth is springier and has more ripples as opposed to higher ks values which lay flat after colliding.</p>
+<div align="center">
+    <table style="width=100%">
+        <tr>
+          <td>
+          <img src="part4_first.png" width="480px" />
+          <figcaption align="middle">First Step</figcaption>
+          <td>
+
+              <td>
+              <img src="part4_second.png" width="480px" />
+              <figcaption align="middle">Second Step</figcaption>
+              <td>
+        </tr>
+        <tr>
+            <td>
+            <img src="part4_third.png" width="480px" />
+            <figcaption align="middle">Third Step</figcaption>
+            <td>
+              <td>
+              <img src="part4_low_density.png" width="480px" />
+              <figcaption align="middle">Low Density</figcaption>
+              <td>
+        </tr>
+        <tr>
+            <td>
+            <img src="part4_high_density.png" width="480px" />
+            <figcaption align="middle">High Density</figcaption>
+            <td>
+              <td>
+              <img src="part4_lowks.png" width="480px" />
+              <figcaption align="middle">Low ks</figcaption>
+              <td>
+        </tr>
+        <tr>
+            <td>
+            <img src="part4_highks.png" width="480px" />
+            <figcaption align="middle">High ks</figcaption>
+            <td>
+
+        </tr>
+    </table>
+</div>
+<h2 align="middle">Part V: Shaders</h2>
+<p>Shaders are able to run in parallel and work on different parts of the graphics pipeline. They usually take in an input and output a four dimensional vector. A shader program is made up of a vertex shader and a fragment shader. The input of the fragment shader is the output of the vertex shader. Vertex shaders are responsible for the positioning of different vertices. The fragment shader takes in a fragment and uses the attributes of the fragment to output a color. </p>
+<p>The Blinn-Phong shading model uses three components, ambient, diffuse, and specular lighting, to capture illumination and to describe how a surface captures light.</p>
+<p>For bump and displacement mapping, I used texture_3.png. I think I wasn't able to generate my displacement mapping correctly. This could be due to my calculations in bump mapping or I didn't set the parameters correctly.</p>
+<div align="center">
+    <table style="width=100%">
+        <tr>
+          <td>
+          <img src="part5_ambient.png" width="480px" />
+          <figcaption align="middle">Blinn-Phong Ambient</figcaption>
+          <td>
+
+              <td>
+              <img src="part5_diffuse.png" width="480px" />
+              <figcaption align="middle">Blinn-Phong Diffuse</figcaption>
+              <td>
+        </tr>
+        <tr>
+            <td>
+            <img src="part5_specular.png" width="480px" />
+            <figcaption align="middle">Blinn-Phong Specular</figcaption>
+            <td>
+              <td>
+              <img src="part5_phongfull.png" width="480px" />
+              <figcaption align="middle">Blinn-Phong Full</figcaption>
+              <td>
+        </tr>
+        <tr>
+            <td>
+            <img src="part5_customtexture.png" width="480px" />
+            <figcaption align="middle">Custom Texture</figcaption>
+            <td>
+              <td>
+              <img src="part5_bump.png" width="480px" />
+              <figcaption align="middle">Bump Mapping</figcaption>
+              <td>
+        </tr>
+        <tr>
+            <td>
+            <img src="part5_displacement.png" width="480px" />
+            <figcaption align="middle">Displacement Mapping</figcaption>
+            <td>
+              <td>
+              <img src="part5_mirror.png" width="480px" />
+              <figcaption align="middle">Mirror Shader</figcaption>
+              <td>
+        </tr>
+    </table>
+</div>
+</body>
 </html>
